@@ -1,10 +1,10 @@
-from .. import schemas, oauth2, utils
+from app import schemas, oauth2, utils
 from fastapi import Depends, HTTPException, status, APIRouter
 from app.dbase import conn, cursor
 
 router = APIRouter(
-    prefix="/employees",
-    tags=["Employees"]
+    prefix="/employee",
+    tags=["Employee"]
 )
 
 @router.get("/")
@@ -19,11 +19,13 @@ def get_employees(current_user:int = Depends(oauth2.get_current_user)) -> list[s
 @router.post("/", status_code=status.HTTP_201_CREATED)
 def create_employee(employee: schemas.Employee):
     employee.password = utils.hash(employee.password)
-    cursor.execute("INSERT INTO employee (firstname, lastname, \
-                   middlei, address, id_number, password) VALUES \
-                   (%s, %s, %s, %s, %s, %s) RETURNING * ", \
-                    (employee.firstname, employee.lastname, \
-                     employee.middlei, employee.address, employee.id_number,employee.password))
+    cursor.execute("""INSERT INTO employee (firstname, lastname, middlei, address, id_number, password, gender, birthday, \
+                   phone_number, employment_status, position, supervisor_id, basic_salary, gsm_rate, hourly_rate) \
+                   VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s) RETURNING * """, 
+                   (employee.firstname, employee.lastname, employee.middlei, employee.address, employee.id_number,
+                    employee.password,employee.gender,employee.birthday,employee.phone_number,employee.employment_status,
+                    employee.position,employee.supervisor_id,employee.basic_salary,employee.gsm_rate,employee.hourly_rate))
+    
     new_employee = cursor.fetchone()
     conn.commit()
 

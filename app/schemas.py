@@ -15,8 +15,17 @@ class EmployeeBase(BaseModel):
     lastname: str
     middlei: str
     address: str
-    password: str
     id_number: int
+    password: str
+    gender: str
+    birthday: str
+    phone_number: str
+    employment_status: str
+    position: str
+    supervisor_id: str
+    basic_salary: float
+    gsm_rate: float
+    hourly_rate: float
 
 class Employee(EmployeeBase):
     pass
