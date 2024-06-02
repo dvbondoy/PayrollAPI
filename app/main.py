@@ -5,7 +5,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from . import models
 from .database import engine
 # import routers
-from .routers import employee, auth, rol, attendance
+from .routers import employee, auth, rol, attendance, payroll
 
 
 # not needed with alembic
@@ -29,6 +29,7 @@ app.include_router(employee.router)
 app.include_router(auth.router)
 app.include_router(attendance.router)
 app.include_router(rol.router)
+app.include_router(payroll.router)
 
 # root route
 @app.get("/")

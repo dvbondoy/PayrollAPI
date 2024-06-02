@@ -7,6 +7,16 @@ router = APIRouter(
     tags=["Employee"]
 )
 
+# @router.get("/")
+# def get_current_employee(current_user: dict = Depends(oauth2.get_current_user),current=False) -> schemas.EmployeeResponse:
+#     if current:
+#         cursor.execute("SELECT * FROM employee WHERE id = %s", (str(current_user['id']),))
+#         employee = cursor.fetchone()
+#         if not employee:
+#             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Employee not found")
+        
+#         return employee
+
 @router.get("/")
 def get_employees(current_user:int = Depends(oauth2.get_current_user)) -> list[schemas.EmployeeResponse]:
    # set and check permissions
@@ -42,6 +52,7 @@ def get_employee(id: int, current_user: dict = Depends(oauth2.get_current_user))
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Employee not found")
     
     return employee
+
 
 @router.put("/{id}")
 def update_employee(id: int, employee: schemas.Employee):

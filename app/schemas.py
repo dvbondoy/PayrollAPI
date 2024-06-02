@@ -37,16 +37,14 @@ class EmployeeResponse(BaseModel):
 
 class Attendance(BaseModel):
     employee_id: int
-    date: str
-    time_in: str
-    time_out: str
+    start_date: str
+    end_date: str
+    total_hours: float
+    notes: str
 
 class Role(BaseModel):
     role: str
     description: str
-
-    # class Config:
-    #     orm_mode = True
 
 class RoleResponse(BaseModel):
     role: str
