@@ -30,7 +30,6 @@ def get_employees(current_user:int = Depends(oauth2.get_current_user)):
 @router.post("/", status_code=status.HTTP_201_CREATED)
 def create_employee(employee: schemas.EmployeeBase, current_user: dict = Depends(oauth2.get_current_user)):
     oauth2.check_permissions(current_user, ['admin'])
-    print(employee)
     """
     Create a new employee record in the database.
 
@@ -42,9 +41,13 @@ def create_employee(employee: schemas.EmployeeBase, current_user: dict = Depends
 
     """
     employee.password = utils.hash(employee.password)
-    cursor.execute("""INSERT INTO employee (firstname, lastname, middlei, address, id_number, password, gender, birthday,phone_number, employment_status, position, supervisor_id, basic_salary) VALUES (%s,%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s) RETURNING * """, (employee.firstname, employee.lastname, employee.middlei, employee.address, employee.id_number, employee.password,employee.gender,employee.birthday,employee.phone_number,employee.employment_status, employee.position,employee.supervisor_id,employee.basic_salary))
-    new_employee = cursor.fetchone()
-    conn.commit()
+    try:
+        cursor.execute("""INSERT INTO employee (firstname, lastname, middlei, address, id_number, password, gender, birthday,phone_number, employment_status, position, supervisor_id, basic_salary) VALUES (%s,%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s) RETURNING * """, (employee.firstname, employee.lastname, employee.middlei, employee.address, employee.id_number, employee.password,employee.gender,employee.birthday,employee.phone_number,employee.employment_status, employee.position,employee.supervisor_id,employee.basic_salary))
+        new_employee = cursor.fetchone()
+        conn.commit()
+    except Exception as e:
+        cursor.execute("ROLLBACK")
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=f"Unable to create employee: {e}")
 
     return new_employee
 
@@ -96,32 +99,32 @@ def update_employee(id: int, employee: schemas.Employee):
     conn.commit()
 
     if updated_employee is None:
+        cursor.execute("ROLLBACK")
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Employee {id} not found")
     
     return updated_employee
 
 @router.delete("/{id}")
 def delete_employee(id: int, current_user: dict = Depends(oauth2.get_current_user)):
-    """
-    Deletes an employee with the given ID from the database.
-
-    Args:
-        id (int): The ID of the employee to be deleted.
-
-    Returns:
-        str: A message indicating that the employee has been deleted.
-
-    Raises:
-        HTTPException: If the employee with the given ID is not found.
-    """
+    
     # set and check permissions
     oauth2.check_permissions(current_user, ['admin'])
-    
-    cursor.execute("DELETE FROM employee WHERE id = %s RETURNING *", (str(id),))
+
+    cursor.execute("""DELETE FROM employee WHERE id = %s RETURNING *;""", (str(id),))
     deleted_employee = cursor.fetchone()
     conn.commit()
 
     if deleted_employee is None:
+        cursor.execute("ROLLBACK")
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Employee {id} not found")
     
     return f"Employee with id {id} has been deleted"
+    
+    # cursor.execute("DELETE FROM employee WHERE id = %s RETURNING *", (str(id),))
+    # deleted_employee = cursor.fetchone()
+    # conn.commit()
+
+    # if deleted_employee is None:
+    #     raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Employee {id} not found")
+    
+    # return f"Employee with id {id} has been deleted"

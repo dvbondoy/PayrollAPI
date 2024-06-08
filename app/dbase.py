@@ -3,6 +3,8 @@ from psycopg2.extras import RealDictCursor
 from .config import settings
 import time
 
+conn = None
+cursor = None
 
 while True:
     try:
