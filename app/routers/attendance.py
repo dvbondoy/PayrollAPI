@@ -1,3 +1,5 @@
+import calendar
+from datetime import datetime
 from .. import schemas, oauth2, utils
 from fastapi import Depends, HTTPException, status, APIRouter
 from app.dbase import conn, cursor
@@ -8,18 +10,21 @@ router = APIRouter(
 )
 
 # get all attendance
-@router.get("/all")
+@router.get("/")
 def get_attendance(current_user:int = Depends(oauth2.get_current_user), limit: int = 50, skip: int = 0):
     oauth2.check_permissions(current_user, ['hr','admin'])
     cursor.execute("SELECT * FROM attendance limit %s offset %s", (limit, skip))
     attendance = cursor.fetchall()
     return attendance
 
-# get attendance by current user
-@router.get("/user")
-def get_attendance_by_current_user(current_user: int = Depends(oauth2.get_current_user), limit: int = 50, skip: int = 0):
-    cursor.execute("SELECT * FROM attendance WHERE employee_id = %s", (str(current_user.get('id')),))
+# get attendance by id
+@router.get("/{id}")
+def get_attendance_by_current_user(id: int, current_user: int = Depends(oauth2.get_current_user), limit: int = 50, skip: int = 0, start_date: str=datetime.date(datetime.today()).replace(day=1), 
+                     end_date: str=datetime.date(datetime.today()).replace(day=calendar.monthrange(datetime.today().year, datetime.today().month)[1])):
+    cursor.execute("SELECT * FROM attendance WHERE employee_id = %s AND end_date BETWEEN %s AND %s", (str(id),start_date,end_date))
     attendance = cursor.fetchall()
+    if not attendance:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Attendance not found")
     return attendance
 
 # clock in current user

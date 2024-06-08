@@ -30,10 +30,11 @@ class EmployeeBase(BaseModel):
 class Employee(EmployeeBase):
     pass
 
-class EmployeeResponse(BaseModel):
-    firstname: str
-    lastname: str
-    middlei: str
+class EmployeeResponse(EmployeeBase):
+    # firstname: str
+    # lastname: str
+    # middlei: str
+    pass
 
 class Attendance(BaseModel):
     employee_id: int
