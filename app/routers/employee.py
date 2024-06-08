@@ -101,7 +101,7 @@ def update_employee(id: int, employee: schemas.Employee):
     return updated_employee
 
 @router.delete("/{id}")
-def delete_employee(id: int):
+def delete_employee(id: int, current_user: dict = Depends(oauth2.get_current_user)):
     """
     Deletes an employee with the given ID from the database.
 
@@ -114,6 +114,9 @@ def delete_employee(id: int):
     Raises:
         HTTPException: If the employee with the given ID is not found.
     """
+    # set and check permissions
+    oauth2.check_permissions(current_user, ['admin'])
+    
     cursor.execute("DELETE FROM employee WHERE id = %s RETURNING *", (str(id),))
     deleted_employee = cursor.fetchone()
     conn.commit()
