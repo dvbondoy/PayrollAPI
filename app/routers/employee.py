@@ -28,15 +28,21 @@ def get_employees(current_user:int = Depends(oauth2.get_current_user)):
     return employees
 
 @router.post("/", status_code=status.HTTP_201_CREATED)
-def create_employee(employee: schemas.Employee):
+def create_employee(employee: schemas.EmployeeBase, current_user: dict = Depends(oauth2.get_current_user)):
+    oauth2.check_permissions(current_user, ['admin'])
+    print(employee)
+    """
+    Create a new employee record in the database.
+
+    Args:
+        employee (schemas.Employee): The employee object containing the employee details.
+
+    Returns:
+        dict: The newly created employee record.
+
+    """
     employee.password = utils.hash(employee.password)
-    cursor.execute("""INSERT INTO employee (firstname, lastname, middlei, address, id_number, password, gender, birthday, \
-                   phone_number, employment_status, position, supervisor_id, basic_salary, gsm_rate, hourly_rate) \
-                   VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s) RETURNING * """, 
-                   (employee.firstname, employee.lastname, employee.middlei, employee.address, employee.id_number,
-                    employee.password,employee.gender,employee.birthday,employee.phone_number,employee.employment_status,
-                    employee.position,employee.supervisor_id,employee.basic_salary,employee.gsm_rate,employee.hourly_rate))
-    
+    cursor.execute("""INSERT INTO employee (firstname, lastname, middlei, address, id_number, password, gender, birthday,phone_number, employment_status, position, supervisor_id, basic_salary) VALUES (%s,%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s) RETURNING * """, (employee.firstname, employee.lastname, employee.middlei, employee.address, employee.id_number, employee.password,employee.gender,employee.birthday,employee.phone_number,employee.employment_status, employee.position,employee.supervisor_id,employee.basic_salary))
     new_employee = cursor.fetchone()
     conn.commit()
 
@@ -44,6 +50,19 @@ def create_employee(employee: schemas.Employee):
 
 @router.get("/{id}")
 def get_employee(id: int, current_user: dict = Depends(oauth2.get_current_user)) -> schemas.EmployeeResponse:
+    """
+    Retrieve an employee by their ID.
+
+    Args:
+        id (int): The ID of the employee to retrieve.
+        current_user (dict, optional): The current user. Defaults to Depends(oauth2.get_current_user).
+
+    Returns:
+        schemas.EmployeeResponse: The response containing the employee information.
+
+    Raises:
+        HTTPException: If the employee is not found.
+    """
     # set and check permissions
     oauth2.check_permissions(current_user, ['admin'])
     # get employee
@@ -57,6 +76,19 @@ def get_employee(id: int, current_user: dict = Depends(oauth2.get_current_user))
 
 @router.put("/{id}")
 def update_employee(id: int, employee: schemas.Employee):
+    """
+    Update an employee's information in the database.
+
+    Args:
+        id (int): The ID of the employee to update.
+        employee (schemas.Employee): The updated employee data.
+
+    Returns:
+        dict: The updated employee data.
+
+    Raises:
+        HTTPException: If the employee with the given ID is not found.
+    """
     cursor.execute("UPDATE employee SET firstname = %s, lastname = %s, middlei = %s, \
                    address = %s WHERE id = %s RETURNING *", (employee.firstname, employee.lastname, \
                     employee.middlei, employee.address, str(id)))
@@ -70,6 +102,18 @@ def update_employee(id: int, employee: schemas.Employee):
 
 @router.delete("/{id}")
 def delete_employee(id: int):
+    """
+    Deletes an employee with the given ID from the database.
+
+    Args:
+        id (int): The ID of the employee to be deleted.
+
+    Returns:
+        str: A message indicating that the employee has been deleted.
+
+    Raises:
+        HTTPException: If the employee with the given ID is not found.
+    """
     cursor.execute("DELETE FROM employee WHERE id = %s RETURNING *", (str(id),))
     deleted_employee = cursor.fetchone()
     conn.commit()

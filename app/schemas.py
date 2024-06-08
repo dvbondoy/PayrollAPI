@@ -22,10 +22,8 @@ class EmployeeBase(BaseModel):
     phone_number: str
     employment_status: str
     position: str
-    supervisor_id: str
-    basic_salary: float
-    gsm_rate: float
-    hourly_rate: float
+    basic_salary: int
+    supervisor_id: int
 
 class Employee(EmployeeBase):
     pass
@@ -77,3 +75,11 @@ class Token(BaseModel):
 
 class TokenData(BaseModel):
     id: Optional[int] = None
+
+class Overtime(BaseModel):
+    employee_id: int
+    supervisor_id: int
+    start_date: str
+    end_date: str
+    total_hours: float
+    approved: bool
