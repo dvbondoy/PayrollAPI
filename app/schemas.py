@@ -1,5 +1,6 @@
 from typing import Optional
 from pydantic import BaseModel
+from datetime import datetime
 
 # pydantic BaseModel is a special class that allows us to define the request body and the response body of our API
 # BaseModel is a special class that comes from Pydantic. It allows us to define the request body and the response body of our API.
@@ -79,7 +80,11 @@ class TokenData(BaseModel):
 class Overtime(BaseModel):
     employee_id: int
     supervisor_id: int
-    start_date: str
-    end_date: str
+    start_date: datetime
+    end_date: datetime
     total_hours: float
     approved: bool
+    attendance_date: datetime
+
+class OvertimeApproval(BaseModel):
+    approved: bool = True
