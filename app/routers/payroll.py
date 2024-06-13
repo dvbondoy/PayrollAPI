@@ -102,9 +102,9 @@ def generate_payroll(id: int, current_user: dict = Depends(oauth2.get_current_us
     # create payroll
     try:
         cursor.execute("INSERT INTO payroll (employee_id, start_date, end_date, total_hours, overtime, gross_pay, days, net_pay, \
-                    total_deductions, total_perks, basic_salary, take_home) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s) \
+                    total_deductions, total_perks, basic_salary, take_home,tax) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s) \
                     RETURNING *", (str(id),start_date,end_date,total_hours,overtime,gross,days,net_pay,total_deductions,total_perks,
-                                    employee['basic_salary'],take_home_pay))
+                                    employee['basic_salary'],take_home_pay,tax))
         payroll = cursor.fetchone()
         conn.commit()
     except Exception as e:
