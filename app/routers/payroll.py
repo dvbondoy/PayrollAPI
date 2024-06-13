@@ -73,10 +73,10 @@ def generate_payroll(id: int, current_user: dict = Depends(oauth2.get_current_us
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"No attendance")
     
     # check if payroll is already generated
-    cursor.execute("SELECT * FROM payroll WHERE employee_id = %s AND start_date = %s AND end_date = %s", (str(id),start_date,end_date))
-    payroll = cursor.fetchone()
-    if payroll:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Payroll already generated")
+    # cursor.execute("SELECT * FROM payroll WHERE employee_id = %s AND start_date = %s AND end_date = %s", (str(id),start_date,end_date))
+    # payroll = cursor.fetchone()
+    # if payroll:
+    #     raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Payroll already generated")
 
     #get gross salary
     total_hours, overtime, gross, days = compute_salary(employee, start_date, end_date)
