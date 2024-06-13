@@ -52,7 +52,7 @@ def create_employee(employee: schemas.EmployeeBase, current_user: dict = Depends
     return new_employee
 
 @router.get("/{id}")
-def get_employee(id: int, current_user: dict = Depends(oauth2.get_current_user)) -> schemas.EmployeeResponse:
+def get_employee(id: int, current_user: dict = Depends(oauth2.get_current_user)):
     """
     Retrieve an employee by their ID.
 
