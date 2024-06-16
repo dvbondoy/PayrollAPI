@@ -1,6 +1,8 @@
+# uvicorn app.main:app --reload
 from fastapi import FastAPI
 # fastapi middleware for cors
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.testclient import TestClient
 
 from . import models
 from .database import engine
@@ -34,6 +36,9 @@ app.include_router(payroll_perk.router)
 app.include_router(payroll_deduction.router)
 app.include_router(overtime.router)
 
+
+client = TestClient(app)
+
 # root route
 @app.get("/")
 def root():
@@ -45,3 +50,8 @@ def startup():
     print ("Starting up")
     # users = user.get_users()
     # print(users)
+
+def test_root():
+    response = client.get("/")
+    assert response.status_code == 200
+    assert response.json() == {"data": "Hello World"}

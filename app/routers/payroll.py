@@ -1,8 +1,7 @@
 # generate payroll
 from fastapi import APIRouter, Depends, HTTPException, status
-from app import schemas, oauth2, utils
+from app import oauth2
 from app.dbase import conn, cursor
-from . import employee
 
 from datetime import datetime
 import calendar
@@ -207,7 +206,7 @@ def compute_deductions(employee: dict):
     if pagibig > 100:
         pagibig = 100
     
-    employee['basic_salary'] = 20000
+    # employee['basic_salary'] = 20000
     sss = compute_sss(employee)
 
     return philhealth, pagibig, sss
@@ -220,3 +219,10 @@ def compute_perks(employee: dict):
         total_perks += perk['amount']
 
     return total_perks, perks
+
+def test_compute_deuctions():
+    employee = {"basic_salary": 20000}
+    philhealth, pagibig, sss = compute_deductions(employee)
+    assert philhealth == 900
+    assert pagibig == 100
+    assert sss == 581.3
