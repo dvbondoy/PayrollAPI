@@ -79,7 +79,7 @@ def get_monthly_summary(current_user: dict = Depends(oauth2.get_current_user), s
     # set and check permissions
     # oauth2.check_permissions(current_user, ['admin'])
     
-    cursor.execute("SELECT SUM(gross_pay) as total_gross, SUM(net_pay) as total_net, SUM(total_deductions) as total_deductions, SUM(total_perks) as total_perks, SUM(tax) as total_tax FROM payroll WHERE end_date BETWEEN %s AND %s", (start_date,end_date))
+    cursor.execute("SELECT SUM(gross_pay) as total_gross, SUM(net_pay) as total_net, SUM(total_deductions) as total_deductions, SUM(total_perks) as total_perks, SUM(tax) as total_tax FROM payroll WHERE start_date BETWEEN %s AND %s", (start_date,end_date))
     summary = cursor.fetchone()
     if not summary:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="No payrolls found")
