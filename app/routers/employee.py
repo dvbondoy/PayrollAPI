@@ -51,6 +51,27 @@ def create_employee(employee: schemas.EmployeeBase, current_user: dict = Depends
 
     return new_employee
 
+@router.get("/current")
+def get_current_employee(current_user: dict = Depends(oauth2.get_current_user)):
+    """
+    Retrieve the current employee.
+
+    Args:
+        current_user (dict, optional): The current user. Defaults to Depends(oauth2.get_current_user).
+
+    Returns:
+        schemas.EmployeeResponse: The response containing the employee information.
+
+    Raises:
+        HTTPException: If the employee is not found.
+    """
+    cursor.execute("SELECT * FROM employee WHERE id = %s", (str(current_user['id']),))
+    employee = cursor.fetchone()
+    if not employee:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Employee not found")
+    
+    return employee
+
 @router.get("/{id}")
 def get_employee(id: int, current_user: dict = Depends(oauth2.get_current_user)):
     """
