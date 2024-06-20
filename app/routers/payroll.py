@@ -38,6 +38,56 @@ def get_payrolls(current_user: dict = Depends(oauth2.get_current_user), start_da
     
     return payrolls
 
+@router.get("/monthly_payroll")
+def get_monthly_payroll(current_user: dict = Depends(oauth2.get_current_user), start_date: str=datetime.date(datetime.today()).replace(day=1), end_date: str=datetime.date(datetime.today()).replace(day=calendar.monthrange(datetime.today().year, datetime.today().month)[1])):
+    """
+    Retrieve monthly payroll information.
+
+    Parameters:
+    - current_user (dict): The current user's information obtained from the OAuth2 authentication.
+
+    Returns:
+    - List[dict]: A list of monthly payroll information.
+
+    Raises:
+    - HTTPException: If no payrolls are found.
+    """
+    # set and check permissions
+    oauth2.check_permissions(current_user, ['admin'])
+    
+    cursor.execute("SELECT * FROM payroll p JOIN employee e ON p.employee_id=e.id WHERE p.start_date=%s AND p.end_date=%s;", (start_date,end_date))
+    payrolls = cursor.fetchall()
+    if not payrolls:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="No payrolls found")
+    
+    return payrolls
+
+@router.get("/monthly_summary")
+def get_monthly_summary(current_user: dict = Depends(oauth2.get_current_user), start_date: str=datetime.date(datetime.today()).replace(day=1), end_date: str=datetime.date(datetime.today()).replace(day=calendar.monthrange(datetime.today().year, datetime.today().month)[1])):
+    """
+    Retrieve monthly payroll summary.
+
+    Parameters:
+    - current_user (dict): The current user's information obtained from the OAuth2 authentication.
+
+    Returns:
+    - dict: The monthly payroll summary.
+
+    Raises:
+    - HTTPException: If no payrolls are found.
+    """
+    # set and check permissions
+    # oauth2.check_permissions(current_user, ['admin'])
+    
+    cursor.execute("SELECT SUM(gross_pay) as total_gross, SUM(net_pay) as total_net, SUM(total_deductions) as total_deductions, SUM(total_perks) as total_perks, SUM(tax) as total_tax FROM payroll WHERE end_date BETWEEN %s AND %s", (start_date,end_date))
+    summary = cursor.fetchone()
+    if not summary:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="No payrolls found")
+    
+    summary['start_date'] = start_date
+    summary['end_date'] = end_date
+    return summary
+
 @router.post("/{id}")
 def generate_payroll(id: int, current_user: dict = Depends(oauth2.get_current_user),start_date: str=datetime.date(datetime.today()).replace(day=1), 
                      end_date: str=datetime.date(datetime.today()).replace(day=calendar.monthrange(datetime.today().year, datetime.today().month)[1])):
