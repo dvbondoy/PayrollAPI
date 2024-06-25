@@ -56,7 +56,7 @@ def get_payroll(id: int, current_user: dict = Depends(oauth2.get_current_user)):
     # set and check permissions
     oauth2.check_permissions(current_user, ['admin'])
     
-    cursor.execute("SELECT * FROM payroll WHERE id = %s", (str(id),))
+    cursor.execute("SELECT * FROM payroll p JOIN employee e ON e.id = p.employee_id WHERE p.id = %s", (str(id),))
     payroll = cursor.fetchone()
     if not payroll:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Payroll not found")
