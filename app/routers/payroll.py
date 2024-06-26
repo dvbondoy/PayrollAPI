@@ -38,30 +38,7 @@ def get_payrolls(current_user: dict = Depends(oauth2.get_current_user), start_da
     
     return payrolls
 
-@router.get("/{id}")
-def get_payroll(id: int, current_user: dict = Depends(oauth2.get_current_user)):
-    """
-    Retrieve payroll information based on the specified ID.
 
-    Parameters:
-    - id (int): The ID of the payroll.
-    - current_user (dict): The current user's information obtained from the OAuth2 authentication.
-
-    Returns:
-    - dict: The payroll information.
-
-    Raises:
-    - HTTPException: If the payroll is not found.
-    """
-    # set and check permissions
-    oauth2.check_permissions(current_user, ['admin'])
-    
-    cursor.execute("SELECT * FROM payroll p JOIN employee e ON e.id = p.employee_id WHERE p.id = %s", (str(id),))
-    payroll = cursor.fetchone()
-    if not payroll:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Payroll not found")
-    
-    return payroll
 
 @router.get("/monthly_payroll")
 def get_monthly_payroll(current_user: dict = Depends(oauth2.get_current_user), start_date: str=datetime.date(datetime.today()).replace(day=1), end_date: str=datetime.date(datetime.today()).replace(day=calendar.monthrange(datetime.today().year, datetime.today().month)[1])):
@@ -112,6 +89,31 @@ def get_monthly_summary(current_user: dict = Depends(oauth2.get_current_user), s
     summary['start_date'] = start_date
     summary['end_date'] = end_date
     return summary
+
+@router.get("/One/{id}")
+def get_payroll(id: int, current_user: dict = Depends(oauth2.get_current_user)):
+    """
+    Retrieve payroll information based on the specified ID.
+
+    Parameters:
+    - id (int): The ID of the payroll.
+    - current_user (dict): The current user's information obtained from the OAuth2 authentication.
+
+    Returns:
+    - dict: The payroll information.
+
+    Raises:
+    - HTTPException: If the payroll is not found.
+    """
+    # set and check permissions
+    oauth2.check_permissions(current_user, ['admin'])
+    
+    cursor.execute("SELECT * FROM payroll p JOIN employee e ON e.id = p.employee_id WHERE p.id = %s", (str(id),))
+    payroll = cursor.fetchone()
+    if not payroll:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Payroll not found")
+    
+    return payroll
 
 @router.post("/{id}")
 def generate_payroll(id: int, current_user: dict = Depends(oauth2.get_current_user),start_date: str=datetime.date(datetime.today()).replace(day=1), 
